@@ -4,6 +4,6 @@ const { getWeatherByLocationId, weatherHistory } = require('../controllers/weath
 const router = express.Router();
 
 router.get('/:locationId', getWeatherByLocationId);
-router.post('/history', weatherHistory);
+router.get('/history', weatherHistory);
 
 module.exports = router;
