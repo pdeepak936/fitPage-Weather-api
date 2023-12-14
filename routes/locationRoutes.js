@@ -9,10 +9,10 @@ const {
 
 const router = express.Router();
 
-router.post('/getall-locations', getAllLocations);
-router.post('/get-location/:locationId', getLocationById);
-router.post('/createLocation', createLocation);
-router.put('/updateLocation/:locationId', updateLocation);
-router.delete('/deleteLocation/:locationId', deleteLocation);
+router.get('/', getAllLocations);
+router.get('/:locationId', getLocationById);
+router.post('/', createLocation);
+router.put('/:locationId', updateLocation);
+router.delete('/:locationId', deleteLocation);
 
 module.exports = router;
