@@ -26,7 +26,7 @@ exports.getWeatherByLocationId = async (req, res) => {
       timestamp: new Date(),
     });
 
-    res.json(savedWeatherData);
+    res.status(200).send(savedWeatherData);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -40,32 +40,43 @@ function getUnixTimestamp(daysAgo) {
 }
 
 exports.weatherHistory = async (req, res) => {
-  const { days, id } = req.body;
+  const { days, id } = req.query;
 
-  const start = getUnixTimestamp(days);
-  const end = getUnixTimestamp(0);
+  if (!days || !id) {
+    return res.status(400).json({ error: 'Missing required parameters' });
+  }
+
+  let start, end;
+
+  switch (parseInt(days)) {
+    case 7:
+      start = getUnixTimestamp(7);
+      end = getUnixTimestamp(0);
+      break;
+    case 15:
+      start = getUnixTimestamp(15);
+      end = getUnixTimestamp(0);
+      break;
+    case 30:
+      start = getUnixTimestamp(30);
+      end = getUnixTimestamp(0);
+      break;
+    default:
+      return res.status(400).json({ error: 'Invalid value for days parameter' });
+  }
 
   try {
-    const location = await LocationModel.findById(id);
-    if (!location) {
+    const data = await LocationModel.findById(id);
+    if (!data) {
       return res.status(404).json({ error: 'Location not found' });
     }
 
-    const lat = location.latitude;
-    const lon = location.longitude;
-
+    const lat = data.latitude;
+    const lon = data.longitude;
     const weatherDataHistory = await getWeatherDataHistory(lat, lon, start, end);
-
-    // Save the historical weather data into a new collection
-    const savedWeatherHistory = await WeatherHistoryModel.create({
-      locationId: id,
-      data: weatherDataHistory,
-      timestamp: new Date(),
-    });
-
-    res.json(savedWeatherHistory);
+    res.json(weatherDataHistory);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error", error });
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
   }
 };
